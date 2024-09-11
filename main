@@ -1,0 +1,37 @@
+*&---------------------------------------------------------------------*
+*& Report  ZP5003_P043
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT  ZP5003_P043.
+
+
+
+
+INCLUDE ZP5003_P043_TOP.
+INCLUDE ZP5003_P043_FRM.
+
+
+START-OF-SELECTION.
+
+
+PERFORM GET_DATA USING S_BUKRS[]
+                       S_BELNR[]
+                       S_GJAHR[]
+                       S_BLART[]
+                       S_BLDAT[].
+
+
+PERFORM SET_FC.
+
+PERFORM SET_LAYOUT.
+
+PERFORM DISPLAY_ALV.
+
+
+
+
+
