@@ -1,0 +1,82 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZP5003_P043_TOP
+*&---------------------------------------------------------------------*
+TABLES BKPF.
+TABLES T001.
+TABLES T003T.
+TYPES: BEGIN OF gty_tbl,
+  BELNR TYPE BELNR_D,
+  BUKRS TYPE BUKRS,
+  BUTXT TYPE BUTXT,
+  GJAHR TYPE GJAHR,
+  BLART TYPE BLART,
+  LTEXT TYPE LTEXT_003T,
+  BLDAT TYPE BLDAT,
+  BUDAT TYPE BUDAT,
+  XBLNR TYPE XBLNR1,
+  BKTXT TYPE BKTXT,
+  WAERS TYPE WAERS,
+  line_color TYPE char4,
+END OF gty_tbl.
+
+
+DATA: gt_tbl TYPE TABLE OF gty_tbl,
+      gt_tbl2 TYPE TABLE OF gty_tbl,
+      gs_tbl TYPE gty_tbl.
+
+
+data: gt_bkpf TYPE TABLE OF BKPF,
+      gs_bkpf TYPE BKPF,
+      gt_t001 TYPE TABLE OF T001,
+      gs_t001 TYPE T001,
+      gt_t003t TYPE TABLE OF T003T,
+      gs_t003t TYPE T003T.
+
+DATA: gt_fieldcatalog TYPE SLIS_T_FIELDCAT_ALV,
+      gs_fieldcatalog TYPE SLIS_FIELDCAT_ALV.
+
+data: gs_layout TYPE SLIS_LAYOUT_ALV.
+
+TYPES : gr_bukrs TYPE RANGE OF bukrs ,
+        gr_belnr TYPE RANGE OF belnr_d ,
+        gr_gjahr TYPE RANGE OF gjahr ,
+        gr_blart TYPE RANGE OF blart ,
+        gr_bldat TYPE RANGE OF bldat .
+
+SELECT-OPTIONS: S_BUKRS FOR BKPF-BUKRS,
+                S_BELNR FOR BKPF-BELNR,
+                S_GJAHR FOR BKPF-GJAHR,
+                S_BLART FOR BKPF-BLART,
+                S_BLDAT FOR BKPF-BLDAT.
+
+
+
+TYPES: BEGIN OF gty_tbl3,
+   BUZEI TYPE BUZEI,
+   BELNR TYPE BELNR_D,
+   HKONT TYPE HKONT,
+   TXT50 type TXT50_SKAT,
+   WRBTR TYPE WRBTR,
+   PSWSL TYPE PSWSL,
+ END OF gty_tbl3.
+
+
+DATA: gt_tbl3 TYPE TABLE OF gty_tbl3,
+      gs_tbl3 TYPE gty_tbl3.
+
+
+data: gt_bseg TYPE TABLE OF BSEG,
+      gs_bseg TYPE BSEG.
+
+
+DATA: gt_skat TYPE TABLE OF SKAT,
+      gs_skat TYPE SKAT.
+
+
+DATA: gt_ska1 TYPE TABLE OF SKA1,
+      gs_ska1 TYPE SKA1.
+
+
+
+DATA: gt_fieldcatalog2 TYPE SLIS_T_FIELDCAT_ALV,
+      gs_fieldcatalog2 TYPE SLIS_FIELDCAT_ALV.
