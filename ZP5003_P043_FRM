@@ -1,0 +1,289 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZP5003_P043_FRM
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Form  GET_DATA
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+ FORM GET_DATA USING S_BUKRS type gr_bukrs
+                     S_BELNR type gr_belnr
+                     S_GJAHR type gr_gjahr
+                     S_BLART type gr_blart
+                     S_BLDAT type gr_bldat.
+
+
+   SELECT * FROM BKPF INTO TABLE gt_bkpf where
+     BUKRS in S_BUKRS[]
+     and BELNR in S_BELNR[]
+     and GJAHR in S_GJAHR[]
+     and BLART in S_BLART[]
+     and BLDAT in S_BLDAT[].
+   SELECT * FROM T001 INTO TABLE gt_t001.
+   SELECT * FROM T003T INTO TABLE gt_t003t.
+
+
+   LOOP AT gt_bkpf INTO gs_bkpf.
+
+     READ TABLE gt_t001 INTO gs_t001 WITH KEY BUKRS = gs_bkpf-BUKRS.
+     READ TABLE gt_t003t INTO gs_t003t WITH KEY spras = sy-langu BLART = gs_bkpf-BLART.
+     CLEAR: gs_tbl.
+     gs_tbl-BELNR = gs_bkpf-BELNR.
+     gs_tbl-BUKRS = gs_bkpf-BUKRS.
+     gs_tbl-BUTXT = gs_t001-BUTXT.
+     gs_tbl-GJAHR = gs_bkpf-GJAHR.
+     gs_tbl-BLART = gs_bkpf-BLART.
+     gs_tbl-LTEXT = gs_t003t-LTEXT.
+     gs_tbl-BLDAT = gs_bkpf-BLDAT.
+     gs_tbl-BUDAT = gs_bkpf-BUDAT.
+     gs_tbl-XBLNR = gs_bkpf-XBLNR.
+     gs_tbl-BKTXT = gs_bkpf-BKTXT.
+     gs_tbl-WAERS = gs_bkpf-WAERS.
+     APPEND gs_tbl to gt_tbl.
+
+   ENDLOOP.
+
+
+    LOOP AT gt_tbl INTO gs_tbl.
+    IF gs_tbl-BLART eq 'SA'.
+      gs_tbl-LINE_COLOR = 'C300'.
+      MODIFY gt_tbl FROM gs_tbl.
+    ELSEIF gs_tbl-BLART eq 'AB'.
+      gs_tbl-LINE_COLOR = 'C710'.
+      MODIFY gt_tbl FROM gs_tbl.
+    ELSEIF gs_tbl-BLART eq 'KR'.
+      gs_tbl-LINE_COLOR = 'C600'.
+      MODIFY gt_tbl FROM gs_tbl.
+    ENDIF.
+  ENDLOOP.
+
+
+
+ ENDFORM.                 " GET_DATA
+*&---------------------------------------------------------------------*
+*&      Form  SET_FC
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+ FORM SET_FC .
+   PERFORM: set_fieldcatalog USING 'BELNR' 'Belge Numarası' 'Belge Numarası' 'Muhasebe belgesinin belge numarası',
+          set_fieldcatalog USING 'BUKRS' 'Şirket kodu' 'Şirket kodu' 'Şirket kodu',
+          set_fieldcatalog USING 'BUTXT' 'Şirket tanımı' 'Şirket tanımı' 'Şirket tanımı',
+          set_fieldcatalog USING 'GJAHR' 'Mali yıl' 'Mali yıl' 'Mali yıl',
+          set_fieldcatalog USING 'BLART' 'Belge türü' 'Belge türü' 'Belge türü',
+          set_fieldcatalog USING 'LTEXT' 'Belge türü tanımı' 'Belge türü tanımı' 'Belge türü tanımı',
+          set_fieldcatalog USING 'BLDAT' 'Belge tarihi' 'Belge tarihi' 'Belge tarihi',
+          set_fieldcatalog USING 'BUDAT' 'Kayıt tarihi' 'Kayıt tarihi' 'Belgedeki kayıt tarihi',
+          set_fieldcatalog USING 'XBLNR' 'Referans belge numarası' 'Referans belge numarası' 'Referans belge numarası',
+          set_fieldcatalog USING 'BKTXT' 'Belge başlığı metni' 'Belge başlığı metni' 'Belge başlığı metni',
+          set_fieldcatalog USING 'WAERS' 'Para birimi anahtarı' 'Para birimi anahtarı' 'Para birimi anahtarı'.
+
+ ENDFORM.                    " SET_FC
+*&---------------------------------------------------------------------*
+*&      Form  SET_LAYOUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+ FORM SET_LAYOUT .
+   gs_layout-ZEBRA             = abap_true.
+   gs_layout-COLWIDTH_OPTIMIZE = abap_true.
+   gs_layout-INFO_FIELDNAME = 'LINE_COLOR'.
+ ENDFORM.                    " SET_LAYOUT
+
+
+
+
+
+*&---------------------------------------------------------------------*
+*&      Form  DISPLAY_ALV
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+ FORM DISPLAY_ALV .
+
+
+
+   CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+  EXPORTING
+*     I_INTERFACE_CHECK                 = ' '
+*     I_BYPASSING_BUFFER                = ' '
+*     I_BUFFER_ACTIVE                   = ' '
+      I_CALLBACK_PROGRAM                = sy-repid
+*     I_CALLBACK_PF_STATUS_SET          = ' '
+      I_CALLBACK_USER_COMMAND           = 'USER_COMMAND'
+*     I_CALLBACK_TOP_OF_PAGE            = ' '
+*     I_CALLBACK_HTML_TOP_OF_PAGE       = ' '
+*     I_CALLBACK_HTML_END_OF_LIST       = ' '
+*     I_STRUCTURE_NAME                  =
+*     I_BACKGROUND_ID                   = ' '
+*     I_GRID_TITLE                      =
+*     I_GRID_SETTINGS                   =
+    IS_LAYOUT                         = gs_layout
+    IT_FIELDCAT                       = gt_fieldcatalog
+*     IT_EXCLUDING                      =
+*     IT_SPECIAL_GROUPS                 =
+*     IT_SORT                           =
+*     IT_FILTER                         =
+*     IS_SEL_HIDE                       =
+*     I_DEFAULT                         = 'X'
+*     I_SAVE                            = ' '
+*     IS_VARIANT                        =
+*     IT_EVENTS                         =
+*     IT_EVENT_EXIT                     =
+*     IS_PRINT                          =
+*     IS_REPREP_ID                      =
+*     I_SCREEN_START_COLUMN             = 0
+*     I_SCREEN_START_LINE               = 0
+*     I_SCREEN_END_COLUMN               = 0
+*     I_SCREEN_END_LINE                 = 0
+*     I_HTML_HEIGHT_TOP                 = 0
+*     I_HTML_HEIGHT_END                 = 0
+*     IT_ALV_GRAPHICS                   =
+*     IT_HYPERLINK                      =
+*     IT_ADD_FIELDCAT                   =
+*     IT_EXCEPT_QINFO                   =
+*     IR_SALV_FULLSCREEN_ADAPTER        =
+*   IMPORTING
+*     E_EXIT_CAUSED_BY_CALLER           =
+*     ES_EXIT_CAUSED_BY_USER            =
+   TABLES
+     T_OUTTAB                          = gt_tbl
+*   EXCEPTIONS
+*     PROGRAM_ERROR                     = 1
+*     OTHERS                            = 2
+           .
+   IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+   ENDIF.
+
+ ENDFORM.                    " DISPLAY_ALV
+
+
+ FORM set_fieldcatalog using p_fieldname
+                             p_SELTEXT_S
+                             p_SELTEXT_M
+                             p_SELTEXT_L   .
+   clear gs_fieldcatalog.
+   gs_fieldcatalog-fieldname = p_fieldname.
+   gs_fieldcatalog-SELTEXT_S = p_SELTEXT_S.
+   gs_fieldcatalog-SELTEXT_M = p_SELTEXT_M.
+   gs_fieldcatalog-SELTEXT_L = p_SELTEXT_L.
+   APPEND gs_fieldcatalog to gt_fieldcatalog.
+ ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  USER_COMMAND
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+ FORM USER_COMMAND USING p_ucomm     TYPE sy-ucomm
+                         ps_selfield TYPE slis_selfield.
+
+   CASE p_ucomm.
+     WHEN '&IC1'.
+
+       CLEAR: gt_tbl3.
+       CLEAR: gt_fieldcatalog2.
+       CASE ps_selfield-FIELDNAME.
+           	WHEN 'BELNR'.
+
+
+*       SELECT * FROM BKPF INTO TABLE gt_bkpf2.
+*       SELECT * FROM T003T INTO TABLE gt_t003t2.
+           SELECT * FROM BSEG INTO TABLE gt_bseg WHERE BELNR = ps_selfield-VALUE.
+           SELECT * FROM SKAT INTO TABLE gt_skat .
+           SELECT * FROM SKA1 INTO TABLE gt_ska1.
+
+
+
+
+           LOOP AT gt_bseg INTO gs_bseg.
+*             data lv_text TYPE char10.
+*             lv_text = gs_bseg-HKONT+4(6).
+
+*         READ TABLE gt_bkpf INTO gs_bkpf WITH KEY BELNR = gs_bseg-BELNR.
+       "   READ TABLE gt_ska1 INTO gs_ska1 WITH KEY SAKNR = gs_bseg-HKONT.
+
+             READ TABLE gt_skat INTO gs_skat WITH KEY spras = sy-langu SAKNR = gs_bseg-HKONT." KTOPL = gs_ska1-KTOPL. 
+
+             CLEAR: gs_tbl3.
+             gs_tbl3-BUZEI = gs_bseg-BUZEI.
+             gs_tbl3-BELNR = gs_bseg-BELNR.
+             gs_tbl3-HKONT = gs_bseg-HKONT.
+             gs_tbl3-TXT50 = gs_skat-TXT50.
+             gs_tbl3-WRBTR = gs_bseg-WRBTR.
+             gs_tbl3-PSWSL = gs_bseg-PSWSL.
+
+             APPEND gs_tbl3 to gt_tbl3.
+
+           ENDLOOP.
+
+
+
+
+           PERFORM: set_fieldcatalog2 USING 'BUZEI' 'Kalem' 'Kalem' 'Kalem',
+                    set_fieldcatalog2 USING 'HKONT' 'Hesap' 'Hesap' 'Hesap',
+                    set_fieldcatalog2 USING 'TXT50' 'Tanım' 'Tanım' 'Tanım',
+                    set_fieldcatalog2 USING 'WRBTR' 'Tutar' 'Tutar' 'Tutar',
+                    set_fieldcatalog2 USING 'PSWSL' 'Para birimi' 'Para birimi' 'Para birimi'.
+
+           IF gs_tbl3-BELNR = ps_selfield-VALUE.
+
+             CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+               EXPORTING
+                 IS_LAYOUT             = gs_layout
+                 IT_FIELDCAT           = gt_fieldcatalog2
+                 I_SCREEN_START_COLUMN = 60
+                 I_SCREEN_START_LINE   = 5
+                 I_SCREEN_END_COLUMN   = 130
+                 I_SCREEN_END_LINE     = 10
+               TABLES
+                 T_OUTTAB              = gt_tbl3.
+
+           else.
+
+             data: lv_msg TYPE char90.
+             CONCATENATE ps_selfield-VALUE
+                         'numaralı belgeye ait belge detayı bulunamadı'
+                         INTO lv_msg
+                         SEPARATED BY space.
+             MESSAGE lv_msg TYPE 'I'.
+
+           ENDIF.
+
+
+
+
+
+       ENDCASE.
+
+   ENDCASE.
+
+
+ ENDFORM.                    " USER_COMMAND
+
+ FORM set_fieldcatalog2 using p_fieldname
+                             p_SELTEXT_S
+                             p_SELTEXT_M
+                             p_SELTEXT_L   .
+   clear gs_fieldcatalog2.
+   gs_fieldcatalog2-fieldname = p_fieldname.
+   gs_fieldcatalog2-SELTEXT_S = p_SELTEXT_S.
+   gs_fieldcatalog2-SELTEXT_M = p_SELTEXT_M.
+   gs_fieldcatalog2-SELTEXT_L = p_SELTEXT_L.
+   APPEND gs_fieldcatalog2 to gt_fieldcatalog2.
+ ENDFORM.
